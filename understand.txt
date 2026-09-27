@@ -1,0 +1,3 @@
+created a simple workflow, we went to langsmith and create a project on our own, ideally what shouldve happened is when workflow is invoked, we automatically saw a trace, but since we are using newer, different versions of langchain and langgraph, we are not able to do that and we explicity write a small callback to store the traces, traces store everything ie. latency, tokens used, time for each run etc.
+
+now what we did in 2nd project is create a sequential chain and use a different project name for langsmith so we see a new project and under that all the traces we have, we also added metadata and tags set inside config and then run it 
