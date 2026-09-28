@@ -1,3 +1,25 @@
 created a simple workflow, we went to langsmith and create a project on our own, ideally what shouldve happened is when workflow is invoked, we automatically saw a trace, but since we are using newer, different versions of langchain and langgraph, we are not able to do that and we explicity write a small callback to store the traces, traces store everything ie. latency, tokens used, time for each run etc.
 
-now what we did in 2nd project is create a sequential chain and use a different project name for langsmith so we see a new project and under that all the traces we have, we also added metadata and tags set inside config and then run it 
+now what we did in 2nd project is create a sequential chain and use a different project name for langsmith so we see a new project and under that all the traces we have, we also added metadata and tags set inside config and then run it, right now trace name is set by default but we can also name it whatever we want explicity from config
+
+now in our create RAG v1 there is a problem, first we are tracing onlt the chain, what about splitting, storing that is not being shown on langsmith ie. how much time these steps are taking as they consititute the major latency here. remember langsmith traces runnables, 2nd issue is sir was running the app again and again from scratch so obviously latency will be more as every time we run our code we have to do chunking, embedding etc. I already fixed it as my code uses a while loop and chunks only one time before the loop runs
+To fix the first problem we made functions under the @tracable decorator, now langsmith will trace them too. See RAG v2
+
+now i used sir code only, it was supposed to create traces automatically but as i used different version so it wasnt, what was happening is we were getting two traces now differently one for splitting (setup_pipeline) and all and 2nd when we invoke the function (rag_query). Now this is good that we are getting splittings trace too but ideally what shouldve happened is 
+RAG application:
+   -setup_pipeline
+   -rag_query
+under one trace only. Using @tracable decorator we can also give tags to indivisual steps too which we did/ the functions we created done in v3 but again version problem came
+
+in v4 now we solved our 2nd problem too ie baar baar in every run, new index was being formed but now we started storing index locally in our project folder itself hence now only 1st time when theis index is being created it took this much time next time only chain wala time is there, but now its not fix the build path will be made again in the following cases:
+ - No cache exists yet means first ever run
+ - PDF content changes
+ - PDF file metadata(eg size) changes
+ - Chunking params change -> chunk size or chunk overlap
+ - Embedding model name changes -> eg from "text-embedding-3-small" to another model
+ V4 wala code is a bit tought but here understanding lamgsmith is priority
+
+now in agent wala code also we used this langsmith and we saw a very long trace as everything was being recorded there if we give a query "where was gandhi born, give the temp of that city". then first agent finds where was he born using duck duck go, then using weather api we find temp of that place now everything is logged but cant show as version problems
+
+ok now in langgraph see whole process same, we just added @tracables on our functions and dont forget to add callback as without that project is not being created, making @tracable on functions is optional even if we dont give names we still get our chain shown.
+
